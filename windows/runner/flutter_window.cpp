@@ -14,10 +14,20 @@
 #include <map>
 #include <vector>
 #include <any>
+#include <variant>
 
 #include <winerror.h>
 
 #include "flutter/generated_plugin_registrant.h"
+
+
+HRESULT InitComLib() {
+  return CoInitializeEx(NULL, tagCOINIT::COINIT_APARTMENTTHREADED);
+}
+
+void CleanupComLib() {
+  CoUninitialize();
+}
 
 
 FlutterWindow::FlutterWindow(
@@ -46,63 +56,180 @@ bool FlutterWindow::OnCreate() {
   }
   RegisterPlugins(flutter_controller_ -> engine());
 
-  flutter::MethodChannel<> channel (
+  flutter::MethodChannel<> firewallChannel (
     flutter_controller_ -> engine() -> messenger(),
     "overwatch_region_control.nightfeather.dev/firewall",
     &flutter::StandardMethodCodec::GetInstance()
   );
 
-
-
-  channel.SetMethodCallHandler(
+  firewallChannel.SetMethodCallHandler(
     [](
       const flutter::MethodCall<>& call,
       std::unique_ptr<flutter::MethodResult<>> call_result
     ) {
-      OutputDebugStringW(L"Tasdasd");
-      if (call.method_name() == "isFirewallEnabled") {
+      std::string methodName = call.method_name();
+
+      if (methodName == "isEnabled") {
         bool pEnabled = false;
-        HRESULT result = IsFirewallEnabled(&pEnabled);
+        HRESULT result = Firewall::IsEnabled(&pEnabled);
         
         if (SUCCEEDED(result)) {
           call_result -> Success(pEnabled);
         } else {
-          call_result -> Error("GET_FIREWALL_STATUS_FAILED", "Unabled to get firewall status.");
-        }
-      } else if (call.method_name() == "addFirewallRule") {
-        std::map<std::string, std::any> example {
-          {std::string("name"), std::string("TestRule")},
-          {std::string("description"), std::string("Testing")},
-          {std::string("app_name"), std::string("C:\\NightFeather\\Coding\\Flutter\\overwatch_region_control\\build\\windows\\x64\\runner\\Debug\\overwatch_region_control.exe")},
-          {std::string("service_name"), std::string("Flutter App")},
-          {std::string("protocol"), (long) 6},
-          {std::string("action"), (long) 1},
-          {std::string("direction"), (long) 2},
-          {std::string("enabled"), false},
-          {std::string("grouping"), std::string("_Flutter_App_Test")},
-        };
-        HRESULT result = AddFirewallRule(example);
-
-        if (SUCCEEDED(result)) {
-          call_result -> Success(true);
-        } else {
           call_result -> Error(
             "GET_FIREWALL_STATUS_FAILED",
-            result == E_ACCESSDENIED ? "no access" : "other"
+            "Unabled to get firewall status"
           );
         }
-      } else if (call.method_name() == "getFirewallRules") {
+      } else if (methodName == "setEnabled") {
+        if (!std::holds_alternative<bool>(*call.arguments())) {
+          call_result -> Error(
+            "BAD_ARGUMENT_TYPE",
+            "The argument type should be single `bool`"
+          );
+          return;
+        }
+
+        bool enabled = std::get<bool>(*call.arguments());
+        HRESULT result = Firewall::SetEnabled(enabled);
+      
+        if (SUCCEEDED(result)) {
+          call_result -> Success(std::monostate());
+        } else {
+          call_result -> Error(
+            "SET_FIREWALL_ENABLED_FAILED",
+            result == E_ACCESSDENIED ? "Access denied" : "Unknown error"
+          );
+        }
+      } else if (methodName == "addRule") {
+        if (!std::holds_alternative<flutter::EncodableMap>(*call.arguments())) {
+          call_result -> Error(
+            "BAD_ARGUMENT_TYPE",
+            "The argument type should be single `flutter::EncodableMap`"
+          );
+          return;
+        }
+
+        flutter::EncodableMap ruleArgs = std::get<flutter::EncodableMap>(*call.arguments());
+        HRESULT result = Firewall::AddRule(ruleArgs);
+      
+        if (SUCCEEDED(result)) {
+          call_result -> Success(std::monostate());
+        } else {
+          call_result -> Error(
+            "ADD_FIREWALL_RULE_FAILED",
+            result == E_ACCESSDENIED ? "Access denied" : "Unknown error"
+          );
+        }
+      } else if (methodName == "deleteRule") {
+        if (!std::holds_alternative<std::string>(*call.arguments())) {
+          call_result -> Error(
+            "BAD_ARGUMENT_TYPE",
+            "The argument type should be single `std::string`"
+          );
+          return;
+        }
+
+        std::string ruleName = std::get<std::string>(*call.arguments());
+        HRESULT result = Firewall::DeleteRule(ruleName);
+      
+        if (SUCCEEDED(result)) {
+          call_result -> Success(std::monostate());
+        } else {
+          call_result -> Error(
+            "DELETE_FIREWALL_RULE_FAILED",
+            result == E_ACCESSDENIED ? "Access denied" : "Unknown error"
+          );
+        }
+      } else if (methodName == "toggleRule") {
+        if (!std::holds_alternative<flutter::EncodableMap>(*call.arguments())) {
+          call_result -> Error(
+            "BAD_ARGUMENT_TYPE",
+            "The argument type should be single `flutter::EncodableMap`"
+          );
+          return;
+        }
+
+        flutter::EncodableMap args = std::get<flutter::EncodableMap>(*call.arguments());
+        flutter::EncodableMap::iterator name = args.find(std::string("name"));
+        flutter::EncodableMap::iterator enabled = args.find(std::string("enabled"));
+        if (name == args.end() || enabled == args.end()) {
+          call_result -> Error(
+            "BAD_ARGUMENT_TYPE",
+            "The argument map should be key `name` and `enabled`"
+          );
+          return;
+        }
+
+        HRESULT result = Firewall::ToggleRule(
+          std::get<std::string>(name -> second),
+          std::get<bool>(enabled -> second)
+        );
+      
+        if (SUCCEEDED(result)) {
+          call_result -> Success(std::monostate());
+        } else {
+          call_result -> Error(
+            "TOGGLE_FIREWALL_RULE_FAILED",
+            result == E_ACCESSDENIED ? "Access denied" : "Unknown error"
+          );
+        }
+      } else if (methodName == "getRules") {
         flutter::EncodableList rules = {};
-        HRESULT result = GetFirewallRules(&rules);
+        HRESULT result = Firewall::GetRules(&rules);
         
         if (SUCCEEDED(result)) {
           call_result -> Success(rules);
         } else {
           call_result -> Error(
-            "GET_FIREWALL_STATUS_FAILED",
-            result == E_ACCESSDENIED ? "no access" : "other"
+            "GET_FIREWALL_RULES_FAILED",
+            "Unable to get firewall rules"
           );
         }
+      } else {
+        call_result -> NotImplemented();
+      }
+    }
+  );
+
+  flutter::MethodChannel<> nativeUtilsChannel (
+    flutter_controller_ -> engine() -> messenger(),
+    "overwatch_region_control.nightfeather.dev/native_utils",
+    &flutter::StandardMethodCodec::GetInstance()
+  );
+
+  nativeUtilsChannel.SetMethodCallHandler(
+    [](
+      const flutter::MethodCall<>& call,
+      std::unique_ptr<flutter::MethodResult<>> call_result
+    ) {
+      std::string methodName = call.method_name();
+
+      if (methodName == "isUserAdmin") {
+        BOOL b;
+        SID_IDENTIFIER_AUTHORITY NtAuthority = SECURITY_NT_AUTHORITY;
+        PSID AdministratorsGroup;
+        b = AllocateAndInitializeSid(
+          &NtAuthority,
+          2,
+          SECURITY_BUILTIN_DOMAIN_RID,
+          DOMAIN_ALIAS_RID_ADMINS,
+          0, 0, 0, 0, 0, 0,
+          &AdministratorsGroup
+        );
+
+        if (b) {
+          if (!CheckTokenMembership(NULL, AdministratorsGroup, &b)) {
+            b = FALSE;
+          }
+          FreeSid(AdministratorsGroup);
+        } else {
+          call_result -> Error(
+            "GET_TOKEN_MEMBERSHIP_FAILED",
+            "Unable to token member ID"
+          );
+        }
+        call_result -> Success(b == TRUE);
       } else {
         call_result -> NotImplemented();
       }

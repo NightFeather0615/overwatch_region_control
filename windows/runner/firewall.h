@@ -17,12 +17,15 @@
 HRESULT InitComLib();
 void CleanupComLib();
 
-HRESULT InitFirewallCom(INetFwPolicy2 **ppNetFwPolicy2);
-HRESULT IsFirewallEnabled(bool* enabled);
-HRESULT AddFirewallRule(std::map<std::string, std::any> ruleArgs);
-HRESULT DeleteFirewallRule(std::string ruleName);
-HRESULT ToggleFirewallRule(std::string ruleName, bool enabled = false);
-HRESULT GetFirewallRules(flutter::EncodableList* rules);
-flutter::EncodableMap FirewallRuleToEncodableMap(INetFwRule* rule);
+namespace Firewall {
+  HRESULT InitCom(INetFwPolicy2 **ppNetFwPolicy2);
+  HRESULT IsEnabled(bool* enabled);
+  HRESULT SetEnabled(bool enabled = true);
+  HRESULT AddRule(flutter::EncodableMap ruleArgs);
+  HRESULT DeleteRule(std::string ruleName);
+  HRESULT ToggleRule(std::string ruleName, bool enabled = false);
+  HRESULT GetRules(flutter::EncodableList* rules);
+  flutter::EncodableMap RuleToEncodableMap(INetFwRule* rule);
+}
 
 #endif // WIN32_FIREWALL_CONTROL_H_
