@@ -98,7 +98,7 @@ class FirewallRule {
   String description;
   String appName;
   String? serviceName;
-  FirewallProtocol protocol;
+  FirewallProtocol? protocol;
   String icmpType;
   String localPorts;
   String remotePorts;
@@ -117,7 +117,7 @@ class FirewallRule {
     this.description = "",
     this.appName = "",
     this.serviceName,
-    this.protocol = FirewallProtocol.tcp,
+    this.protocol,
     this.icmpType = "",
     this.localPorts = "",
     this.remotePorts = "",
@@ -193,7 +193,6 @@ class FirewallRule {
       "name": name,
       "description": description,
       "app_name": appName,
-      "protocol": protocol.toInt(),
       "icmp_type": icmpType,
       "local_ports": localPorts,
       "remote_ports": remotePorts,
@@ -213,36 +212,72 @@ class FirewallRule {
     if (profiles != null) {
       data["profiles"] = profiles!.toInt();
     }
+    if (protocol != null) {
+      data["protocol"] = protocol!.toInt();
+    }
 
     return data;
   }
 }
 
 class Firewall {
-  static const native = MethodChannel("overwatch_region_control.nightfeather.dev/firewall");
+  Firewall._();
+
+  static const _native = MethodChannel("overwatch_region_control.nightfeather.dev/firewall");
 
   static Future<bool> isEnabled() async {
-    return await native.invokeMethod("isEnabled");
+    return await _native.invokeMethod("isEnabled");
   }
 
   static Future<void> setEnabled({bool enabled = true}) async {
-    await native.invokeMethod("setEnabled", enabled);
+    await _native.invokeMethod("setEnabled", enabled);
   }
 
-  static Future<void> addRule(FirewallRule rule) async {
-    await native.invokeListMethod("addRule", rule.toMap());
+  static Future<void> addRule(FirewallRule rule, {bool bothDirection = true}) async {
+    if (bothDirection) {
+      String baseName = rule.name;
+      
+      rule.name = "${baseName}_In";
+      rule.direction = FirewallRuleDirection.directionIn;
+      await _native.invokeListMethod("addRule", rule.toMap());
+
+      rule.name = "${baseName}_Out";
+      rule.direction = FirewallRuleDirection.directionOut;
+      await _native.invokeListMethod("addRule", rule.toMap());
+    } else {
+      await _native.invokeListMethod("addRule", rule.toMap());
+    }
   }
 
-  static Future<void> deleteRule(String name) async {
-    await native.invokeListMethod("deleteRule", name);
+  static Future<void> deleteRule(String name, {bool bothDirection = true}) async {
+    if (bothDirection) {
+      await _native.invokeListMethod("deleteRule", "${name}_In");
+      await _native.invokeListMethod("deleteRule", "${name}_Out");
+    } else {
+      await _native.invokeListMethod("deleteRule", name);
+    }
   }
 
-  static Future<void> toggleRule(String name, {bool enabled = false}) async {
-    await native.invokeListMethod("toggleRule", {"name": name, "enabled": enabled});
+  static Future<void> toggleRule(String name, {bool enabled = false, bool bothDirection = true}) async {
+    if (bothDirection) {
+      await _native.invokeListMethod("toggleRule", {"name": "${name}_In", "enabled": enabled});
+      await _native.invokeListMethod("toggleRule", {"name": "${name}_Out", "enabled": enabled});
+    } else {
+      await _native.invokeListMethod("toggleRule", {"name": name, "enabled": enabled});
+    }
+  }
+
+  static Future<FirewallRule?> getRule(String name) async {
+    try {
+      Map<dynamic, dynamic> rule = await _native.invokeMethod("getRule", name);
+      return FirewallRule.fromMap(rule);
+    } catch (_) {
+      return null;
+    }
   }
 
   static Future<List<FirewallRule>> getRules() async {
-    List<Map<dynamic, dynamic>> rules = await native.invokeListMethod("getRules") ?? [];
+    List<Map<dynamic, dynamic>> rules = await _native.invokeListMethod("getRules") ?? [];
     return rules.map((data) => FirewallRule.fromMap(data)).toList();
   }
 }

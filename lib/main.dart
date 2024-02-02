@@ -1,10 +1,18 @@
 import "package:flutter/material.dart";
 import "package:hive_flutter/hive_flutter.dart";
+import "package:overwatch_region_control/config.dart";
+import "package:overwatch_region_control/page/home.dart";
+import "package:overwatch_region_control/page/settings.dart";
 import "package:overwatch_region_control/page/setup.dart";
+import "package:window_manager/window_manager.dart";
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await windowManager.ensureInitialized();
+  await WindowManager.instance.setTitle(Config.appTitle);
+  await WindowManager.instance.setMinimumSize(const Size(610, 415));
 
   await Hive.initFlutter();
   await Hive.openBox("sharedPref");
@@ -18,7 +26,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Overwatch Region Control",
+      title: Config.appTitle,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color.fromARGB(255, 0, 116, 224),
@@ -29,6 +37,56 @@ class MainApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       home: const SetupPage(),
+    );
+  }
+}
+
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
+
+  @override
+  State<StatefulWidget> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  int _selectedIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          NavigationRail(
+            selectedIndex: _selectedIndex,
+            labelType: NavigationRailLabelType.selected,
+            groupAlignment: 0.0,
+            onDestinationSelected: (value) {
+              setState(() {
+                _selectedIndex = value;
+              });
+            },
+            destinations: const [
+              NavigationRailDestination(
+                icon: Icon(Icons.home_rounded),
+                label: Text("Home")
+              ),
+              NavigationRailDestination(
+                icon: Icon(Icons.settings_rounded),
+                label: Text("Settings")
+              ),
+            ],
+          ),
+          Expanded(
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: const [
+                HomePage(),
+                SettingsPage(),
+              ],
+            )
+          )
+        ],
+      ),
     );
   }
 }

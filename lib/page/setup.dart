@@ -4,7 +4,9 @@ import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
 import "package:hive_flutter/hive_flutter.dart";
 import "package:overwatch_region_control/core/firewall.dart";
+import "package:overwatch_region_control/core/ip_config.dart";
 import "package:overwatch_region_control/core/native_utils.dart";
+import "package:overwatch_region_control/main.dart";
 
 
 class ProgressBar extends StatefulWidget {
@@ -64,14 +66,26 @@ class _SetupPageState extends State<SetupPage> {
     "Checking permission",
     "Checking firewall status",
     "Checking Overwatch game path",
-    "Finishing up"
+    "Checking update for source data",
+    "Loading source data",
+    "Checking update for IP config",
+    "Loading IP config",
+    "Initializing firewall",
   ];
   int _stepIndex = 0;
 
+  void _progressBarNext() {
+    if (mounted) {
+      setState(() {
+        _stepIndex += 1;
+      });
+    }
+  }
+
   Future<void> _startupCheck() async {
-    if (!(await NativeUtils.isUserAdmin())) {
+    if (!await NativeUtils.isUserAdmin()) {
       if (mounted) {
-        Navigator.of(context).push(
+        await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => RequestActionPage(
               title: "This program is not running as an administrator",
@@ -83,14 +97,11 @@ class _SetupPageState extends State<SetupPage> {
         );
       }
     }
-    if (mounted) {
-      setState(() {
-        _stepIndex += 1;
-      });
-    }
-    if (!(await Firewall.isEnabled())) {
+    _progressBarNext();
+
+    if (!await Firewall.isEnabled()) {
       if (mounted) {
-        Navigator.of(context).push(
+        await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => RequestActionPage(
               title: "Windows Firewall not enabled",
@@ -105,15 +116,11 @@ class _SetupPageState extends State<SetupPage> {
         );
       }
     }
-    if (mounted) {
-      setState(() {
-        _stepIndex += 1;
-      });
-    }
-    _sharedPref.delete("gameExePath");
+    _progressBarNext();
+
     if (_sharedPref.get("gameExePath") == null || (_sharedPref.get("gameExePath") as String).isEmpty) {
       if (mounted) {
-        Navigator.of(context).push(
+        await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => RequestActionPage(
               title: "Overwatch game path not assigned",
@@ -138,12 +145,28 @@ class _SetupPageState extends State<SetupPage> {
         );
       }
     }
+    _progressBarNext();
+
+    await IpConfig.updateSourceData();
+    _progressBarNext();
+
+    await IpConfig.loadSourceData();
+    _progressBarNext();
+
+    await IpConfig.updateRegionData();
+    _progressBarNext();
+
+    await IpConfig.loadConfig();
+    _progressBarNext();
+
+    await IpConfig.initFirewall();
+    _progressBarNext();
+
     if (mounted) {
-      setState(() {
-        _stepIndex += 1;
-      });
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainPage())
+      );
     }
-    
   }
 
   @override
@@ -167,15 +190,20 @@ class _SetupPageState extends State<SetupPage> {
                 fontWeight: FontWeight.bold
               ),
             ),
-            Text(
+            if (_stepIndex < _steps.length) Text(
               "${_steps[_stepIndex]}...",
               style: const TextStyle(
+                fontSize: 20
+              ),
+            ) else const Text(
+              "Finishing up...",
+              style: TextStyle(
                 fontSize: 20
               ),
             ),
             const Spacer(),
             SizedBox(
-              height: MediaQuery.of(context).size.height / 10,
+              height: MediaQuery.of(context).size.height / 8,
               width: MediaQuery.of(context).size.width / 1.2,
               child: ProgressBar(length: _steps.length, progress: _stepIndex),
             )

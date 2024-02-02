@@ -95,10 +95,15 @@ bool FlutterWindow::OnCreate() {
       
         if (SUCCEEDED(result)) {
           call_result -> Success(std::monostate());
+        } else if (result == E_ACCESSDENIED) {
+          call_result -> Error(
+            "ACCESS_DENIED",
+            "The operation was aborted due to permissions issues"
+          );
         } else {
           call_result -> Error(
             "SET_FIREWALL_ENABLED_FAILED",
-            result == E_ACCESSDENIED ? "Access denied" : "Unknown error"
+            "Unknown error"
           );
         }
       } else if (methodName == "addRule") {
@@ -115,10 +120,15 @@ bool FlutterWindow::OnCreate() {
       
         if (SUCCEEDED(result)) {
           call_result -> Success(std::monostate());
+        } else if (result == E_ACCESSDENIED) {
+          call_result -> Error(
+            "ACCESS_DENIED",
+            "The operation was aborted due to permissions issues"
+          );
         } else {
           call_result -> Error(
             "ADD_FIREWALL_RULE_FAILED",
-            result == E_ACCESSDENIED ? "Access denied" : "Unknown error"
+            "Unknown error"
           );
         }
       } else if (methodName == "deleteRule") {
@@ -135,10 +145,15 @@ bool FlutterWindow::OnCreate() {
       
         if (SUCCEEDED(result)) {
           call_result -> Success(std::monostate());
+        } else if (result == E_ACCESSDENIED) {
+          call_result -> Error(
+            "ACCESS_DENIED",
+            "The operation was aborted due to permissions issues"
+          );
         } else {
           call_result -> Error(
             "DELETE_FIREWALL_RULE_FAILED",
-            result == E_ACCESSDENIED ? "Access denied" : "Unknown error"
+            "Unknown error"
           );
         }
       } else if (methodName == "toggleRule") {
@@ -168,10 +183,41 @@ bool FlutterWindow::OnCreate() {
       
         if (SUCCEEDED(result)) {
           call_result -> Success(std::monostate());
+        } else if (result == E_ACCESSDENIED) {
+          call_result -> Error(
+            "ACCESS_DENIED",
+            "The operation was aborted due to permissions issues"
+          );
         } else {
           call_result -> Error(
             "TOGGLE_FIREWALL_RULE_FAILED",
-            result == E_ACCESSDENIED ? "Access denied" : "Unknown error"
+            "Unknown error"
+          );
+        }
+      } else if (methodName == "getRule") {
+        if (!std::holds_alternative<std::string>(*call.arguments())) {
+          call_result -> Error(
+            "BAD_ARGUMENT_TYPE",
+            "The argument type should be single `std::string`"
+          );
+          return;
+        }
+
+        std::string ruleName = std::get<std::string>(*call.arguments());
+        flutter::EncodableMap rule = {};
+        HRESULT result = Firewall::GetRule(ruleName, &rule);
+        
+        if (SUCCEEDED(result)) {
+          call_result -> Success(rule);
+        } else if (result == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
+          call_result -> Error(
+            "RULE_NOT_FOUND",
+            "The requested item does not exist"
+          );
+        } else {
+          call_result -> Error(
+            "GET_FIREWALL_RULE_FAILED",
+            "Unable to get firewall rule"
           );
         }
       } else if (methodName == "getRules") {

@@ -200,8 +200,6 @@ namespace Firewall {
     pRuleArg = ruleArgs.find(std::string("protocol"));
     if (pRuleArg != ruleArgs.end()) {
       pNetFwRule -> put_Protocol(EncodableToLong(pRuleArg -> second));
-    } else {
-      pNetFwRule -> put_Protocol(static_cast<long>(6));
     }
     pRuleArg = ruleArgs.find(std::string("icmp_type"));
     if (pRuleArg != ruleArgs.end()) {
@@ -335,6 +333,44 @@ namespace Firewall {
     if (FAILED(hr)) {
       goto Cleanup;
     }
+
+  Cleanup:
+    if (pNetFwPolicy2 != NULL){
+      pNetFwPolicy2 -> Release();
+    }
+    if (pNetFwRules != NULL){
+      pNetFwRules -> Release();
+    }
+    if (pNetFwRule != NULL){
+      pNetFwRule -> Release();
+    }
+
+    return hr;
+  }
+
+  HRESULT GetRule(std::string ruleName, flutter::EncodableMap* rule) {
+    HRESULT hr = S_OK;
+
+    INetFwPolicy2 *pNetFwPolicy2 = NULL;
+    INetFwRules *pNetFwRules = NULL;
+    INetFwRule *pNetFwRule = NULL;
+
+    hr = InitCom(&pNetFwPolicy2);
+    if (FAILED(hr)) {
+      goto Cleanup;
+    }
+
+    hr = pNetFwPolicy2 -> get_Rules(&pNetFwRules);
+    if (FAILED(hr)) {
+      goto Cleanup;
+    }
+
+    hr = pNetFwRules -> Item(StringToBstr(ruleName), &pNetFwRule);
+    if (FAILED(hr)) {
+      goto Cleanup;
+    }
+
+    *rule = RuleToEncodableMap(pNetFwRule);
 
   Cleanup:
     if (pNetFwPolicy2 != NULL){

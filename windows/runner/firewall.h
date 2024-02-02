@@ -24,6 +24,7 @@ namespace Firewall {
   HRESULT AddRule(flutter::EncodableMap ruleArgs);
   HRESULT DeleteRule(std::string ruleName);
   HRESULT ToggleRule(std::string ruleName, bool enabled = false);
+  HRESULT GetRule(std::string ruleName, flutter::EncodableMap* rule);
   HRESULT GetRules(flutter::EncodableList* rules);
   flutter::EncodableMap RuleToEncodableMap(INetFwRule* rule);
 }

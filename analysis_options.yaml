@@ -3,4 +3,3 @@ include: package:flutter_lints/flutter.yaml
 linter:
   rules:
     prefer_double_quotes: true
-    avoid_function_literals_in_foreach_calls: false
