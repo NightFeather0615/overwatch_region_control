@@ -1,5 +1,6 @@
 {
   "version": "0.0.1",
+  "ip_source_verison_url": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/IP_version.txt",
   "regions": [
     {
       "name": "Korea",
