@@ -1,0 +1,82 @@
+{
+  "version": "0.0.1",
+  "regions": [
+    {
+      "name": "Korea",
+      "emoji": "flag_kr",
+      "region": "asia",
+      "ping_server": "https://dynamodb.ap-northeast-2.amazonaws.com",
+      "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_AS_Korea.txt"
+    },
+    {
+      "name": "Singapore",
+      "emoji": "flag_sg",
+      "region": "asia",
+      "ping_server": "https://dynamodb.ap-southeast-1.amazonaws.com",
+      "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_AS_Singapore.txt"
+    },
+    {
+      "name": "Taiwan",
+      "emoji": "flag_tw",
+      "region": "asia",
+      "ping_server": "https://asia-east1-pubsub.googleapis.com/\$discovery/rest?version=v1",
+      "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_AS_Taiwan.txt"
+    },
+    {
+      "name": "Japan",
+      "emoji": "flag_jp",
+      "region": "asia",
+      "ping_server": "https://dynamodb.ap-northeast-1.amazonaws.com",
+      "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_AS_Japan.txt"
+    },
+    {
+      "name": "Middle East",
+      "emoji": "earth_africa",
+      "region": "middle_east",
+      "ping_server": "https://dynamodb.me-south-1.amazonaws.com",
+      "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_ME.txt"
+    },
+    {
+      "name": "Europe",
+      "emoji": "flag_eu",
+      "region": "europe",
+      "ping_server": "https://dynamodb.eu-west-3.amazonaws.com",
+      "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_EU.txt"
+    },
+    {
+      "name": "Eastern US",
+      "emoji": "flag_us",
+      "region": "north_america",
+      "ping_server": "https://dynamodb.us-east-1.amazonaws.com",
+      "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_NA_East.txt"
+    },
+    {
+      "name": "Western US",
+      "emoji": "flag_us",
+      "region": "north_america",
+      "ping_server": "https://dynamodb.us-west-1.amazonaws.com",
+      "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_NA_West.txt"
+    },
+    {
+      "name": "Central US",
+      "emoji": "flag_us",
+      "region": "north_america",
+      "ping_server": "https://us-central1-pubsub.googleapis.com/\$discovery/rest?version=v1",
+      "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_NA_central.txt"
+    },
+    {
+      "name": "Brazil",
+      "emoji": "flag_br",
+      "region": "south_and_central_america",
+      "ping_server": "https://dynamodb.sa-east-1.amazonaws.com",
+      "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_Brazil.txt"
+    },
+    {
+      "name": "Australia",
+      "emoji": "flag_au",
+      "region": "oceania",
+      "ping_server": "https://dynamodb.ap-southeast-2.amazonaws.com",
+      "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_Australia.txt"
+    }
+  ]
+}
