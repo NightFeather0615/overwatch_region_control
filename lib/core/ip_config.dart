@@ -83,6 +83,7 @@ class IpConfig {
 
     if (data["version"] == latestData["version"]) return;
 
+    await File("${appDir.path}\\ipConfig.json").delete();
     await dataFile.writeAsString(_jsonEncoder.convert(latestData));
   }
 
