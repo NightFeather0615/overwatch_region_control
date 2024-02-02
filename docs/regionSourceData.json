@@ -19,7 +19,7 @@
       "name": "Taiwan",
       "emoji": "flag_tw",
       "region": "asia",
-      "ping_server": "https://asia-east1-pubsub.googleapis.com/\$discovery/rest?version=v1",
+      "ping_server": "https://asia-east1-pubsub.googleapis.com/$discovery/rest?version=v1",
       "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_AS_Taiwan.txt"
     },
     {
@@ -61,7 +61,7 @@
       "name": "Central US",
       "emoji": "flag_us",
       "region": "north_america",
-      "ping_server": "https://us-central1-pubsub.googleapis.com/\$discovery/rest?version=v1",
+      "ping_server": "https://us-central1-pubsub.googleapis.com/$discovery/rest?version=v1",
       "ip_source": "https://raw.githubusercontent.com/foryVERX/Overwatch-Server-Selector/main/ip_lists/Ip_ranges_NA_central.txt"
     },
     {
