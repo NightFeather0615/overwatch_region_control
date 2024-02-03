@@ -6,6 +6,7 @@ import "package:overwatch_region_control/core/firewall.dart";
 import "package:overwatch_region_control/core/ip_config.dart";
 import "package:overwatch_region_control/core/network.dart";
 
+
 class RegionCard extends StatefulWidget {
   const RegionCard({super.key, required this.regionData});
 
@@ -54,6 +55,9 @@ class _RegionCardState extends State<RegionCard> with AutomaticKeepAliveClientMi
       return;
     }
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -135,7 +139,4 @@ class _RegionCardState extends State<RegionCard> with AutomaticKeepAliveClientMi
       ),
     );
   }
-  
-  @override
-  bool get wantKeepAlive => true;
 }

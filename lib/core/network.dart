@@ -1,7 +1,7 @@
 import "dart:io";
 
-
 import "package:overwatch_region_control/core/extension.dart";
+
 
 class Network {
   Network._();

@@ -6,7 +6,9 @@ import "package:hive_flutter/hive_flutter.dart";
 import "package:overwatch_region_control/config.dart";
 import "package:overwatch_region_control/core/firewall.dart";
 import "package:overwatch_region_control/core/network.dart";
+import "package:overwatch_region_control/core/utils.dart";
 import "package:path_provider/path_provider.dart";
+
 
 enum IpRegion {
   asia,
@@ -65,14 +67,10 @@ class IpConfig {
     return rawData.split("\r").map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
   }
 
-  static Future<Directory> _getAppDocDir() async {
-    Directory docDir = await getApplicationDocumentsDirectory();
-    return await Directory("${docDir.path}\\OverwatchRegionControl").create();
-  }
-
   static Future<void> updateSourceData() async {
-    Directory appDir = await  _getAppDocDir();
+    Directory appDir = await Utils.getAppDocDir();
     File dataFile = File("${appDir.path}\\regionSourceData.json");
+    File configFile = File("${appDir.path}\\ipConfig.json");
     dynamic latestData = jsonDecode(await Network.getUrlContent(Uri.parse(Config.regionSourceDataUrl)));
 
     if (!await dataFile.exists()) {
@@ -83,7 +81,10 @@ class IpConfig {
 
     if (data["version"] == latestData["version"]) return;
 
-    await File("${appDir.path}\\ipConfig.json").delete();
+    if (await configFile.exists()) {
+      await configFile.delete();
+    }
+    
     await dataFile.writeAsString(_jsonEncoder.convert(latestData));
   }
 
@@ -96,7 +97,7 @@ class IpConfig {
 
   static Future<void> updateRegionData() async {
     String latestVersion = await Network.getUrlContent(Uri.parse(sourceData["ip_source_verison_url"]));
-    Directory appDir = await  _getAppDocDir();
+    Directory appDir = await Utils.getAppDocDir();
     File configFile = File("${appDir.path}\\ipConfig.json");
 
     if (!await configFile.exists()) {

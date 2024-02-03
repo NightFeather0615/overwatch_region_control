@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "overwatch_region_control" "\0"
+            VALUE "CompanyName", "dev.nightfeather" "\0"
+            VALUE "FileDescription", "Overwatch Region Control" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "overwatch_region_control" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "overwatch_region_control.exe" "\0"
-            VALUE "ProductName", "overwatch_region_control" "\0"
+            VALUE "InternalName", "Overwatch Region Control" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 dev.nightfeather. All rights reserved." "\0"
+            VALUE "OriginalFilename", "Overwatch Region Control.exe" "\0"
+            VALUE "ProductName", "Overwatch Region Control" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

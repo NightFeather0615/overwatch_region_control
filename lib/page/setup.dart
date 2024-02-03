@@ -1,11 +1,11 @@
 import "dart:io";
 
-import "package:file_picker/file_picker.dart";
 import "package:flutter/material.dart";
 import "package:hive_flutter/hive_flutter.dart";
 import "package:overwatch_region_control/core/firewall.dart";
 import "package:overwatch_region_control/core/ip_config.dart";
 import "package:overwatch_region_control/core/native_utils.dart";
+import "package:overwatch_region_control/core/utils.dart";
 import "package:overwatch_region_control/main.dart";
 
 
@@ -60,7 +60,6 @@ class SetupPage extends StatefulWidget {
 
 class _SetupPageState extends State<SetupPage> {
   final Box _sharedPref = Hive.box("sharedPref");
-  final RegExp _overwatchGamePathRegex = RegExp(r"(Overwatch\\_retail_\\Overwatch\.exe)|(steamapps\\common\\Overwatch\\Overwatch\.exe)");
 
   final List<String> _steps = [
     "Checking permission",
@@ -126,18 +125,8 @@ class _SetupPageState extends State<SetupPage> {
               title: "Overwatch game path not assigned",
               description: "The game path needs to be specified to set up firewall rules.\nGame path should end with \"Overwatch\\_retail_\\Overwatch.exe\" on Battle.net\nor \"steamapps\\common\\Overwatch\\Overwatch.exe\" on Steam.",
               action: () async {
-                FilePickerResult? result = await FilePicker.platform.pickFiles(
-                  dialogTitle: "Choose Overwatch game path",
-                  initialDirectory: "C:\\",
-                  type: FileType.custom,
-                  allowedExtensions: ["exe"],
-                  lockParentWindow: true
-                );
-                if (result == null || !result.isSinglePick) return;
-                if (_overwatchGamePathRegex.hasMatch(result.files.first.path ?? "")) {
-                  _sharedPref.put("gameExePath", result.files.first.path);
-                  if (mounted) Navigator.of(context).pop();
-                }
+                bool result = await Utils.updateGamePath();
+                if (result && mounted) Navigator.of(context).pop();
               },
               buttonText: "Choose Path",
             )
@@ -213,6 +202,7 @@ class _SetupPageState extends State<SetupPage> {
     );
   }
 }
+
 
 class RequestActionPage extends StatelessWidget {
   const RequestActionPage({super.key, required this.title, required this.description, this.action, required this.buttonText});
