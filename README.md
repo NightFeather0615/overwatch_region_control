@@ -1,8 +1,8 @@
 # Overwatch Region Control
 Choose the server region you want play with.
 
-[Main Page](/img/screenshot-main-page.png)
-[VirusTotal](/img/screenshot-virustotal.png)
+![Main Page](/img/screenshot-main-page.png)
+![VirusTotal](/img/screenshot-virustotal.png)
 
 ## Acknowledgement
 Don't forget to check those projects!
