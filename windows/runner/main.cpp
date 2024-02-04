@@ -5,6 +5,9 @@
 #include "flutter_window.h"
 #include "utils.h"
 
+#include <bitsdojo_window_windows/bitsdojo_window_plugin.h>
+int bdw = bitsdojo_window_configure(BDW_HIDE_ON_STARTUP);
+
 int APIENTRY wWinMain(
   _In_ HINSTANCE instance,
   _In_opt_ HINSTANCE prev,
@@ -30,7 +33,7 @@ int APIENTRY wWinMain(
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(L"overwatch_region_control", origin, size)) {
+  if (!window.Create(L"Overwatch Region Control", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

@@ -1,19 +1,25 @@
 import "package:flutter/material.dart";
+
+import "package:bitsdojo_window/bitsdojo_window.dart";
 import "package:hive_flutter/hive_flutter.dart";
+
 import "package:overwatch_region_control/config.dart";
 import "package:overwatch_region_control/page/home.dart";
 import "package:overwatch_region_control/page/settings.dart";
 import "package:overwatch_region_control/page/setup.dart";
-import "package:window_manager/window_manager.dart";
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await windowManager.ensureInitialized();
-  await WindowManager.instance.setTitle(Config.appTitle);
-  await WindowManager.instance.setMinimumSize(const Size(610, 415));
-
+  doWhenWindowReady(() {
+    Size initialSize = const Size(610, 415);
+    appWindow.minSize = initialSize;
+    appWindow.size = initialSize;
+    appWindow.title = Config.appTitle;
+    appWindow.show();
+  });
+  
   await Hive.initFlutter();
   await Hive.openBox("sharedPref");
 
